@@ -13,6 +13,8 @@ export const UserList: FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     loadDomains();
@@ -59,6 +61,39 @@ export const UserList: FC = () => {
     }
   };
 
+  const handleDisableUser = async (user: User) => {
+    if (!user.account_enabled) return; // Already disabled
+
+    if (!confirm(`Disable ${user.display_name}? This will release their license.`)) {
+      return;
+    }
+
+    setActionLoading(user.id);
+    try {
+      await apiClient.disableUser(user.id);
+      await loadUsers(); // Refresh the list
+    } catch (err) {
+      alert('Failed to disable user: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!userToDelete) return;
+
+    setActionLoading(userToDelete.id);
+    try {
+      await apiClient.deleteUser(userToDelete.id);
+      setUserToDelete(null);
+      await loadUsers(); // Refresh the list
+    } catch (err) {
+      alert('Failed to delete user: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const columns = [
     {
       header: 'Name',
@@ -89,6 +124,29 @@ export const UserList: FC = () => {
         >
           {user.account_enabled ? 'Active' : 'Disabled'}
         </span>
+      ),
+    },
+    {
+      header: 'Actions',
+      accessor: (user: User) => (
+        <div className="flex gap-2">
+          {user.account_enabled && (
+            <button
+              onClick={() => handleDisableUser(user)}
+              disabled={actionLoading === user.id}
+              className="text-xs px-2 py-1 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded disabled:opacity-50"
+            >
+              {actionLoading === user.id ? '...' : 'Disable'}
+            </button>
+          )}
+          <button
+            onClick={() => setUserToDelete(user)}
+            disabled={actionLoading === user.id}
+            className="text-xs px-2 py-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded disabled:opacity-50"
+          >
+            Delete
+          </button>
+        </div>
       ),
     },
   ];
@@ -159,6 +217,45 @@ export const UserList: FC = () => {
         onClose={() => setIsCreateModalOpen(false)}
         onUserCreated={loadUsers}
       />
+
+      {/* Delete Confirmation Modal */}
+      {userToDelete && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+              onClick={() => setUserToDelete(null)}
+            />
+
+            {/* Modal */}
+            <div className="relative bg-white rounded shadow-xl max-w-md w-full p-6">
+              <h2 className="text-lg font-semibold mb-4">Delete User</h2>
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to permanently delete{' '}
+                <strong>{userToDelete.display_name}</strong> ({userToDelete.email})?
+                This action cannot be undone.
+              </p>
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="secondary"
+                  onClick={() => setUserToDelete(null)}
+                  disabled={actionLoading === userToDelete.id}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="danger"
+                  onClick={handleDeleteUser}
+                  disabled={actionLoading === userToDelete.id}
+                >
+                  {actionLoading === userToDelete.id ? 'Deleting...' : 'Delete User'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
