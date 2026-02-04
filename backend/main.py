@@ -4,9 +4,9 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 from datetime import datetime
 
-from .config import get_settings
-from .database import get_db, init_db, AuditLog
-from .models import (
+from config import get_settings
+from database import get_db, init_db, AuditLog
+from models import (
     Domain,
     User,
     CreateUserRequest,
@@ -14,8 +14,8 @@ from .models import (
     AIAnalysisRequest,
     AIAnalysisResponse
 )
-from .providers.microsoft import MicrosoftGraphProvider
-from .ai.recommender import AIRecommender
+from providers.microsoft import MicrosoftGraphProvider
+from ai.recommender import AIRecommender
 
 app = FastAPI(title="JARVIS API", version="1.0.0")
 
