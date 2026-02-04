@@ -119,8 +119,7 @@ export const CreateUserModal: FC<CreateUserModalProps> = ({
               <select
                 value={selectedDomain}
                 onChange={(e) => setSelectedDomain(e.target.value)}
-                className="w-44 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black focus:border-black truncate"
-                style={{ textOverflow: 'ellipsis' }}
+                className="w-32 px-2 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
                 title={selectedDomain}
               >
                 {domains.map((domain) => (
