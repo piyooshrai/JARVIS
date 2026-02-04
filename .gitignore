@@ -137,3 +137,46 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Python Backend
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.installed.cfg
+*.egg
+venv/
+env/
+ENV/
+.venv/
+
+# Cloud Provider Credentials - CRITICAL
+.aws/
+aws_credentials
+digitalocean_token
+godaddy_key
+godaddy_secret
+microsoft_credentials
+*_token.txt
+*_key.txt
+*_secret.txt
+credentials/
+secrets/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# IDE
+.idea/
+*.iml
+*.swp
+*.swo
+
+# JARVIS Specific
+audit_logs/
+forensics_snapshots/
