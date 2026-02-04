@@ -1,4 +1,4 @@
-import type { ReactNode, ButtonHTMLAttributes } from 'react';
+import type { ReactNode, FC } from 'react';
 
 interface ButtonProps {
   onClick?: () => void;
@@ -9,7 +9,7 @@ interface ButtonProps {
   className?: string;
 }
 
-export const Button: React.FC<ButtonProps> = ({
+export const Button: FC<ButtonProps> = ({
   onClick,
   children,
   variant = 'primary',
