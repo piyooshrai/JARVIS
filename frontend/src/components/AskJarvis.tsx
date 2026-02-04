@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import { useState, type FC, type FormEvent } from 'react';
 import { Button } from './Button';
 import { apiClient } from '../api/client';
 
-export const AskJarvis: React.FC = () => {
+export const AskJarvis: FC = () => {
   const [question, setQuestion] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setResponse('');
