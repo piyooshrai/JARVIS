@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./jarvis.db"
 
     # CORS
-    cors_origins: str = "http://localhost:3000,http://localhost:5173,https://*.vercel.app"
+    cors_origins: str = "http://localhost:3000,http://localhost:5173,https://jarvis-blond-five.vercel.app"
 
     class Config:
         env_file = ".env"
