@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type FC } from 'react';
 import { Table } from './Table';
 import { Button } from './Button';
 import { CreateUserModal } from './CreateUserModal';
 import { apiClient, User, UserListResponse, Domain } from '../api/client';
 
-export const UserList: React.FC = () => {
+export const UserList: FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [domains, setDomains] = useState<Domain[]>([]);
   const [selectedDomain, setSelectedDomain] = useState<string>('');

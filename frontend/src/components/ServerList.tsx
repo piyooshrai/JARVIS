@@ -1,7 +1,7 @@
-import React from 'react';
+import type { FC } from 'react';
 import { Button } from './Button';
 
-export const ServerList: React.FC = () => {
+export const ServerList: FC = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">

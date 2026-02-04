@@ -1,8 +1,8 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 interface Column<T> {
   header: string;
-  accessor: keyof T | ((row: T) => React.ReactNode);
+  accessor: keyof T | ((row: T) => ReactNode);
   className?: string;
 }
 
@@ -17,7 +17,7 @@ export function Table<T extends { id: string }>({ columns, data, onRowClick }: T
     if (typeof column.accessor === 'function') {
       return column.accessor(row);
     }
-    return row[column.accessor] as React.ReactNode;
+    return row[column.accessor] as ReactNode;
   };
 
   return (

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, type FC, type FormEvent } from 'react';
 import { Modal } from './Modal';
 import { Button } from './Button';
 import { apiClient, Domain, CreateUserRequest } from '../api/client';
@@ -9,7 +9,7 @@ interface CreateUserModalProps {
   onUserCreated: () => void;
 }
 
-export const CreateUserModal: React.FC<CreateUserModalProps> = ({
+export const CreateUserModal: FC<CreateUserModalProps> = ({
   isOpen,
   onClose,
   onUserCreated,
@@ -42,7 +42,7 @@ export const CreateUserModal: React.FC<CreateUserModalProps> = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
