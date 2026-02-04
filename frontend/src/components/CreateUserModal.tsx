@@ -106,7 +106,7 @@ export const CreateUserModal: FC<CreateUserModalProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <input
                 type="text"
                 value={username}
@@ -115,11 +115,12 @@ export const CreateUserModal: FC<CreateUserModalProps> = ({
                 placeholder="username"
                 required
               />
-              <span className="flex items-center text-gray-500">@</span>
+              <span className="text-gray-500">@</span>
               <select
                 value={selectedDomain}
                 onChange={(e) => setSelectedDomain(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+                className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black focus:border-black max-w-[200px] truncate"
+                title={selectedDomain}
               >
                 {domains.map((domain) => (
                   <option key={domain.id} value={domain.name}>
