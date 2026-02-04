@@ -3,8 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from datetime import datetime
+import logging
 
 from config import get_settings
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 from database import get_db, init_db, AuditLog
 from models import (
     Domain,
@@ -47,6 +52,7 @@ async def get_domains():
         domains = await provider.get_domains()
         return domains
     except Exception as e:
+        logger.error(f"Error fetching domains: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -73,6 +79,7 @@ async def get_users(domain: Optional[str] = None, db: Session = Depends(get_db))
             monthly_cost=monthly_cost
         )
     except Exception as e:
+        logger.error(f"Error fetching users: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
