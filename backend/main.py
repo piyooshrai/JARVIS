@@ -19,16 +19,17 @@ from ai.recommender import AIRecommender
 
 app = FastAPI(title="JARVIS API", version="1.0.0")
 
+settings = get_settings()
+
 # CORS configuration
+cors_origins = settings.cors_origins.split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-settings = get_settings()
 
 # Initialize database on startup
 @app.on_event("startup")
