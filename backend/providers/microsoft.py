@@ -3,6 +3,9 @@ import httpx
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from config import get_settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class MicrosoftGraphProvider:
@@ -11,6 +14,12 @@ class MicrosoftGraphProvider:
         self.authority = f"https://login.microsoftonline.com/{self.settings.microsoft_tenant_id}"
         self.scope = ["https://graph.microsoft.com/.default"]
         self.graph_endpoint = "https://graph.microsoft.com/v1.0"
+
+        # Debug logging
+        logger.info(f"Initializing Microsoft Graph Provider")
+        logger.info(f"Tenant ID from settings: {self.settings.microsoft_tenant_id}")
+        logger.info(f"Client ID from settings: {self.settings.microsoft_client_id}")
+        logger.info(f"Authority URL: {self.authority}")
 
     def _get_access_token(self) -> str:
         """Get access token for Microsoft Graph API"""
