@@ -1,6 +1,6 @@
 from anthropic import Anthropic
 from typing import Dict, Any, Optional
-from ..config import get_settings
+from config import get_settings
 
 
 class AIRecommender:

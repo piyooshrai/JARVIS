@@ -2,7 +2,7 @@ import msal
 import httpx
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from ..config import get_settings
+from config import get_settings
 
 
 class MicrosoftGraphProvider:
