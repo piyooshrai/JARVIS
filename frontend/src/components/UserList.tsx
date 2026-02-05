@@ -180,6 +180,35 @@ export const UserList: FC = () => {
     alert(`Deleted ${successCount} user(s). ${failCount > 0 ? `Failed: ${failCount}` : ''}`);
   };
 
+  const exportToCSV = () => {
+    const headers = ['Name', 'Email', 'Domain', 'Last Sign-in', 'Status', 'License Type', 'Department'];
+    const csvData = users.map(user => [
+      user.display_name,
+      user.email,
+      user.domain,
+      formatDate(user.last_sign_in),
+      user.account_enabled ? 'Active' : 'Disabled',
+      user.license_type || 'None',
+      user.department || ''
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', `jarvis-users-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const columns = [
     {
       header: (
@@ -302,6 +331,9 @@ export const UserList: FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <Button variant="secondary" onClick={exportToCSV}>
+            Export CSV
+          </Button>
           <Button variant="secondary" onClick={() => {}}>
             Cleanup Inactive Users
           </Button>
