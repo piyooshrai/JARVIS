@@ -198,6 +198,39 @@ async def ask_jarvis(request: AIAnalysisRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# Server Management Endpoints
+
+@app.get("/api/servers")
+async def get_servers():
+    """List all servers from DO, AWS, GoDaddy"""
+    try:
+        # TODO: Implement actual provider calls when ready
+        # from providers.digitalocean import DigitalOceanProvider
+        # from providers.aws import AWSProvider
+        # from providers.godaddy import GoDaddyProvider
+
+        servers = [
+            {
+                "id": "demo-1",
+                "name": "demo-server-1",
+                "provider": "DigitalOcean",
+                "size": "2 vCPU, 2GB RAM",
+                "cost_monthly": 12.00,
+                "status": "active",
+                "region": "nyc3"
+            }
+        ]
+
+        return {
+            "servers": servers,
+            "total": len(servers),
+            "monthly_cost": sum(s.get("cost_monthly", 0) for s in servers)
+        }
+    except Exception as e:
+        logger.error(f"Error fetching servers: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Health check
 @app.get("/health")
 async def health_check():
