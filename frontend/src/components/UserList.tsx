@@ -18,6 +18,9 @@ export const UserList: FC = () => {
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [aiAnalysisOpen, setAiAnalysisOpen] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState<string>('');
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     loadDomains();
@@ -179,6 +182,21 @@ export const UserList: FC = () => {
     await loadUsers();
 
     alert(`Deleted ${successCount} user(s). ${failCount > 0 ? `Failed: ${failCount}` : ''}`);
+  };
+
+  const handleAnalyzeUsers = async () => {
+    setAiLoading(true);
+    setAiAnalysisOpen(true);
+    setAiAnalysis('');
+
+    try {
+      const result = await apiClient.analyzeUsers();
+      setAiAnalysis(result.response);
+    } catch (err) {
+      setAiAnalysis('Failed to analyze users: ' + (err instanceof Error ? err.message : 'Unknown error'));
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const exportToCSV = () => {
@@ -354,7 +372,7 @@ export const UserList: FC = () => {
           <Button variant="secondary" onClick={exportToCSV}>
             Export CSV
           </Button>
-          <Button variant="secondary" onClick={() => {}}>
+          <Button variant="secondary" onClick={handleAnalyzeUsers}>
             Cleanup Inactive Users
           </Button>
           <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>
@@ -432,6 +450,46 @@ export const UserList: FC = () => {
                   disabled={actionLoading === userToDelete.id}
                 >
                   {actionLoading === userToDelete.id ? 'Deleting...' : 'Delete User'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AI Analysis Modal */}
+      {aiAnalysisOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center p-4">
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+              onClick={() => !aiLoading && setAiAnalysisOpen(false)}
+            />
+
+            {/* Modal */}
+            <div className="relative bg-white rounded shadow-xl max-w-2xl w-full p-6">
+              <h2 className="text-lg font-semibold mb-4">AI User Analysis</h2>
+
+              {aiLoading ? (
+                <div className="text-center py-8">
+                  <div className="text-gray-500">Analyzing users with Claude AI...</div>
+                </div>
+              ) : (
+                <div className="mb-6">
+                  <div className="text-gray-700 whitespace-pre-wrap max-h-96 overflow-y-auto">
+                    {aiAnalysis}
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end">
+                <Button
+                  variant="secondary"
+                  onClick={() => setAiAnalysisOpen(false)}
+                  disabled={aiLoading}
+                >
+                  Close
                 </Button>
               </div>
             </div>
