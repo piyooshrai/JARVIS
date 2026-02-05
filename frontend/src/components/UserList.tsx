@@ -17,6 +17,7 @@ export const UserList: FC = () => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     loadDomains();
@@ -209,12 +210,22 @@ export const UserList: FC = () => {
     document.body.removeChild(link);
   };
 
+  const filteredUsers = users.filter(user => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      user.display_name?.toLowerCase().includes(query) ||
+      user.email?.toLowerCase().includes(query) ||
+      user.department?.toLowerCase().includes(query)
+    );
+  });
+
   const columns = [
     {
       header: (
         <input
           type="checkbox"
-          checked={selectedUserIds.size === users.length && users.length > 0}
+          checked={selectedUserIds.size === filteredUsers.length && filteredUsers.length > 0}
           onChange={toggleSelectAll}
           className="rounded border-gray-300"
         />
@@ -289,6 +300,15 @@ export const UserList: FC = () => {
       {/* Header with filters and actions */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
+          <div>
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black focus:border-black w-64"
+            />
+          </div>
           <div>
             <label className="text-sm font-medium text-gray-700 mr-2">
               Filter by domain:
@@ -365,8 +385,12 @@ export const UserList: FC = () => {
       {/* Table */}
       {loading ? (
         <div className="text-center py-12 text-gray-500">Loading users...</div>
+      ) : filteredUsers.length === 0 ? (
+        <div className="text-center py-12 text-gray-500">
+          {searchQuery ? 'No users match your search.' : 'No users found.'}
+        </div>
       ) : (
-        <Table columns={columns} data={users} />
+        <Table columns={columns} data={filteredUsers} />
       )}
 
       {/* Create User Modal */}
