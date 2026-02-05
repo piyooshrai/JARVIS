@@ -79,7 +79,7 @@ async def get_users(domain: Optional[str] = None, db: Session = Depends(get_db))
         cached = cache.get(cache_key)
         if cached is not None:
             logger.info(f"Returning cached users for domain: {domain or 'all'}")
-            return cached
+            return UserListResponse(**cached)
 
         # Fetch from API
         provider = MicrosoftGraphProvider()
@@ -101,8 +101,8 @@ async def get_users(domain: Optional[str] = None, db: Session = Depends(get_db))
             monthly_cost=monthly_cost
         )
 
-        # Cache for 1 hour
-        cache.set(cache_key, result, ttl_seconds=3600)
+        # Cache the dict representation for 1 hour
+        cache.set(cache_key, result.model_dump(), ttl_seconds=3600)
 
         return result
     except Exception as e:
