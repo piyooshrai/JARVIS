@@ -17,7 +17,7 @@ export const Button: FC<ButtonProps> = ({
   type = 'button',
   className = '',
 }) => {
-  const baseStyles = 'px-4 py-2 font-medium text-sm rounded transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed';
+  const baseStyles = 'px-3 sm:px-4 py-2 sm:py-2 font-medium text-sm rounded-lg sm:rounded transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation whitespace-nowrap min-h-[44px] sm:min-h-0 flex items-center justify-center';
 
   const variantStyles = {
     primary: 'bg-black text-white hover:bg-gray-800 active:bg-gray-900',

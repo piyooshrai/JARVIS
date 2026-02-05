@@ -114,11 +114,13 @@ export const ServerList: FC = () => {
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Header with actions */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Infrastructure</h2>
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <h2 className="text-lg sm:text-xl font-semibold">Infrastructure</h2>
+
+        {/* Desktop: Filters and actions */}
+        <div className="hidden sm:flex items-center gap-3 flex-wrap">
           <select
             value={filterProvider}
             onChange={(e) => setFilterProvider(e.target.value)}
@@ -146,16 +148,40 @@ export const ServerList: FC = () => {
             + New Server
           </Button>
         </div>
+
+        {/* Mobile: Filters */}
+        <div className="sm:hidden flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+          <select
+            value={filterProvider}
+            onChange={(e) => setFilterProvider(e.target.value)}
+            className="px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black flex-1 min-w-0"
+          >
+            <option value="All">All Providers</option>
+            <option value="DigitalOcean">DigitalOcean</option>
+            <option value="AWS">AWS</option>
+            <option value="GoDaddy">GoDaddy</option>
+          </select>
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black flex-1 min-w-0"
+          >
+            <option value="All">All Types</option>
+            <option value="Server">Servers</option>
+            <option value="Domain">Domains</option>
+            <option value="SSL Certificate">SSL Certs</option>
+          </select>
+        </div>
       </div>
 
       {/* Stats */}
-      <div className="flex gap-6 text-sm">
+      <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm bg-gray-50 sm:bg-transparent -mx-4 sm:mx-0 px-4 sm:px-0 py-3 sm:py-0 rounded-none sm:rounded">
         <div>
-          <span className="text-gray-500">Total Servers:</span>{' '}
+          <span className="text-gray-500">Total:</span>{' '}
           <span className="font-semibold">{filteredServers.length}</span>
         </div>
         <div>
-          <span className="text-gray-500">Monthly Cost:</span>{' '}
+          <span className="text-gray-500">Cost/Month:</span>{' '}
           <span className="font-semibold">
             ${filteredServers.reduce((sum, s) => sum + s.cost_monthly, 0).toFixed(2)}
           </span>
