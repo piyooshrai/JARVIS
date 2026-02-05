@@ -398,6 +398,30 @@ export const UserList: FC = () => {
         </div>
       </div>
 
+      {/* Bulk Actions (Desktop only) */}
+      {selectedUserIds.size > 0 && (
+        <div className="hidden sm:flex items-center gap-3 bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
+          <span className="text-sm text-gray-700">
+            {selectedUserIds.size} user{selectedUserIds.size > 1 ? 's' : ''} selected
+          </span>
+          <div className="flex-1" />
+          <Button
+            variant="secondary"
+            onClick={handleBulkDisable}
+            disabled={bulkActionLoading}
+          >
+            {bulkActionLoading ? 'Processing...' : 'Disable Selected'}
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleBulkDelete}
+            disabled={bulkActionLoading}
+          >
+            {bulkActionLoading ? 'Processing...' : 'Delete Selected'}
+          </Button>
+        </div>
+      )}
+
       {/* Error message */}
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
