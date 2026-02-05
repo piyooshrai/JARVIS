@@ -15,6 +15,8 @@ export const UserList: FC = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set());
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
 
   useEffect(() => {
     loadDomains();
@@ -94,7 +96,109 @@ export const UserList: FC = () => {
     }
   };
 
+  const toggleUserSelection = (userId: string) => {
+    const newSelected = new Set(selectedUserIds);
+    if (newSelected.has(userId)) {
+      newSelected.delete(userId);
+    } else {
+      newSelected.add(userId);
+    }
+    setSelectedUserIds(newSelected);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedUserIds.size === users.length) {
+      setSelectedUserIds(new Set());
+    } else {
+      setSelectedUserIds(new Set(users.map(u => u.id)));
+    }
+  };
+
+  const handleBulkDisable = async () => {
+    const usersToDisable = users.filter(u => selectedUserIds.has(u.id) && u.account_enabled);
+
+    if (usersToDisable.length === 0) {
+      alert('No active users selected to disable.');
+      return;
+    }
+
+    if (!confirm(`Disable ${usersToDisable.length} user(s)? This will release their licenses.`)) {
+      return;
+    }
+
+    setBulkActionLoading(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const user of usersToDisable) {
+      try {
+        await apiClient.disableUser(user.id);
+        successCount++;
+      } catch (err) {
+        failCount++;
+        console.error(`Failed to disable ${user.email}:`, err);
+      }
+    }
+
+    setBulkActionLoading(false);
+    setSelectedUserIds(new Set());
+    await loadUsers();
+
+    alert(`Disabled ${successCount} user(s). ${failCount > 0 ? `Failed: ${failCount}` : ''}`);
+  };
+
+  const handleBulkDelete = async () => {
+    const usersToDelete = users.filter(u => selectedUserIds.has(u.id));
+
+    if (usersToDelete.length === 0) {
+      alert('No users selected to delete.');
+      return;
+    }
+
+    if (!confirm(`PERMANENTLY DELETE ${usersToDelete.length} user(s)? This action cannot be undone.`)) {
+      return;
+    }
+
+    setBulkActionLoading(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const user of usersToDelete) {
+      try {
+        await apiClient.deleteUser(user.id);
+        successCount++;
+      } catch (err) {
+        failCount++;
+        console.error(`Failed to delete ${user.email}:`, err);
+      }
+    }
+
+    setBulkActionLoading(false);
+    setSelectedUserIds(new Set());
+    await loadUsers();
+
+    alert(`Deleted ${successCount} user(s). ${failCount > 0 ? `Failed: ${failCount}` : ''}`);
+  };
+
   const columns = [
+    {
+      header: (
+        <input
+          type="checkbox"
+          checked={selectedUserIds.size === users.length && users.length > 0}
+          onChange={toggleSelectAll}
+          className="rounded border-gray-300"
+        />
+      ),
+      accessor: (user: User) => (
+        <input
+          type="checkbox"
+          checked={selectedUserIds.has(user.id)}
+          onChange={() => toggleUserSelection(user.id)}
+          className="rounded border-gray-300"
+        />
+      ),
+    },
     {
       header: 'Name',
       accessor: 'display_name' as keyof User,
@@ -173,6 +277,28 @@ export const UserList: FC = () => {
               ))}
             </select>
           </div>
+
+          {selectedUserIds.size > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">
+                {selectedUserIds.size} selected
+              </span>
+              <Button
+                variant="secondary"
+                onClick={handleBulkDisable}
+                disabled={bulkActionLoading}
+              >
+                {bulkActionLoading ? 'Processing...' : 'Bulk Disable'}
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleBulkDelete}
+                disabled={bulkActionLoading}
+              >
+                {bulkActionLoading ? 'Processing...' : 'Bulk Delete'}
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
