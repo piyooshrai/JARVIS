@@ -187,18 +187,30 @@ class MicrosoftGraphProvider:
         }
 
         async with httpx.AsyncClient() as client:
-            # Disable the account
-            response = await client.patch(
-                f"{self.graph_endpoint}/users/{user_id}",
-                headers=headers,
-                json={"accountEnabled": False}
-            )
-            response.raise_for_status()
+            try:
+                # Disable the account
+                response = await client.patch(
+                    f"{self.graph_endpoint}/users/{user_id}",
+                    headers=headers,
+                    json={"accountEnabled": False}
+                )
+                response.raise_for_status()
+                logger.info(f"Successfully disabled user {user_id}")
 
-            # TODO: Remove licenses
-            # This would require additional API call to /users/{id}/assignLicense
+                # TODO: Remove licenses
+                # This would require additional API call to /users/{id}/assignLicense
 
-            return True
+                return True
+            except httpx.HTTPStatusError as e:
+                error_detail = ""
+                try:
+                    error_json = e.response.json()
+                    error_detail = error_json.get("error", {}).get("message", str(e))
+                except:
+                    error_detail = str(e)
+
+                logger.error(f"Failed to disable user {user_id}: {error_detail}")
+                raise Exception(f"Microsoft Graph API error: {error_detail}")
 
     async def delete_user(self, user_id: str) -> bool:
         """Permanently delete a user"""
@@ -206,12 +218,24 @@ class MicrosoftGraphProvider:
         headers = {"Authorization": f"Bearer {token}"}
 
         async with httpx.AsyncClient() as client:
-            response = await client.delete(
-                f"{self.graph_endpoint}/users/{user_id}",
-                headers=headers
-            )
-            response.raise_for_status()
-            return True
+            try:
+                response = await client.delete(
+                    f"{self.graph_endpoint}/users/{user_id}",
+                    headers=headers
+                )
+                response.raise_for_status()
+                logger.info(f"Successfully deleted user {user_id}")
+                return True
+            except httpx.HTTPStatusError as e:
+                error_detail = ""
+                try:
+                    error_json = e.response.json()
+                    error_detail = error_json.get("error", {}).get("message", str(e))
+                except:
+                    error_detail = str(e)
+
+                logger.error(f"Failed to delete user {user_id}: {error_detail}")
+                raise Exception(f"Microsoft Graph API error: {error_detail}")
 
     def _generate_temp_password(self) -> str:
         """Generate a temporary password for new users"""

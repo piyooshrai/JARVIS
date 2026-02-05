@@ -173,7 +173,10 @@ async def disable_user(user_id: str, db: Session = Depends(get_db)):
             return {"success": True, "message": "User disabled successfully"}
         else:
             raise HTTPException(status_code=500, detail="Failed to disable user")
+    except HTTPException:
+        raise
     except Exception as e:
+        logger.error(f"Error disabling user {user_id}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -204,7 +207,10 @@ async def delete_user(user_id: str, db: Session = Depends(get_db)):
             return {"success": True, "message": "User deleted successfully"}
         else:
             raise HTTPException(status_code=500, detail="Failed to delete user")
+    except HTTPException:
+        raise
     except Exception as e:
+        logger.error(f"Error deleting user {user_id}: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
