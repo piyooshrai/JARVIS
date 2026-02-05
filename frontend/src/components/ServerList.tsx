@@ -10,6 +10,7 @@ interface Server {
   cost_monthly: number;
   status: string;
   region?: string;
+  expires_at?: string;
 }
 
 interface ServerListResponse {
@@ -20,10 +21,9 @@ interface ServerListResponse {
 
 export const ServerList: FC = () => {
   const [servers, setServers] = useState<Server[]>([]);
-  const [totalServers, setTotalServers] = useState(0);
-  const [monthlyCost, setMonthlyCost] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [filterProvider, setFilterProvider] = useState<string>('All');
 
   useEffect(() => {
     loadServers();
@@ -37,14 +37,16 @@ export const ServerList: FC = () => {
       if (!response.ok) throw new Error('Failed to fetch servers');
       const data: ServerListResponse = await response.json();
       setServers(data.servers);
-      setTotalServers(data.total);
-      setMonthlyCost(data.monthly_cost);
     } catch (err) {
       setError('Server management integrations coming soon...');
     } finally {
       setLoading(false);
     }
   };
+
+  const filteredServers = filterProvider === 'All'
+    ? servers
+    : servers.filter(s => s.provider === filterProvider);
 
   const columns = [
     {
@@ -69,6 +71,12 @@ export const ServerList: FC = () => {
       accessor: (server: Server) => `$${server.cost_monthly.toFixed(2)}`,
     },
     {
+      header: 'Expires',
+      accessor: (server: Server) => server.expires_at
+        ? new Date(server.expires_at).toLocaleDateString()
+        : '-',
+    },
+    {
       header: 'Status',
       accessor: (server: Server) => (
         <span
@@ -90,6 +98,16 @@ export const ServerList: FC = () => {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Infrastructure</h2>
         <div className="flex items-center gap-3">
+          <select
+            value={filterProvider}
+            onChange={(e) => setFilterProvider(e.target.value)}
+            className="px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+          >
+            <option value="All">All Providers</option>
+            <option value="DigitalOcean">DigitalOcean</option>
+            <option value="AWS">AWS</option>
+            <option value="GoDaddy">GoDaddy</option>
+          </select>
           <Button variant="secondary" disabled>
             Sync All
           </Button>
@@ -103,11 +121,13 @@ export const ServerList: FC = () => {
       <div className="flex gap-6 text-sm">
         <div>
           <span className="text-gray-500">Total Servers:</span>{' '}
-          <span className="font-semibold">{totalServers}</span>
+          <span className="font-semibold">{filteredServers.length}</span>
         </div>
         <div>
           <span className="text-gray-500">Monthly Cost:</span>{' '}
-          <span className="font-semibold">${monthlyCost.toFixed(2)}</span>
+          <span className="font-semibold">
+            ${filteredServers.reduce((sum, s) => sum + s.cost_monthly, 0).toFixed(2)}
+          </span>
         </div>
       </div>
 
@@ -135,7 +155,7 @@ export const ServerList: FC = () => {
           No servers found. Add cloud provider credentials to get started.
         </div>
       ) : (
-        servers.length > 0 && <Table columns={columns} data={servers} />
+        filteredServers.length > 0 && <Table columns={columns} data={filteredServers} />
       )}
     </div>
   );
