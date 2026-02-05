@@ -1,6 +1,8 @@
 import { useState, useEffect, type FC } from 'react';
 import { Table } from './Table';
 import { Button } from './Button';
+import { PullToRefresh } from './PullToRefresh';
+import { apiClient } from '../api/client';
 
 interface Server {
   id: string;
@@ -44,6 +46,12 @@ export const ServerList: FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    // Clear cache and reload data
+    await apiClient.refreshCache();
+    await loadServers();
   };
 
   const filteredServers = servers.filter(s => {
@@ -114,7 +122,8 @@ export const ServerList: FC = () => {
   ];
 
   return (
-    <div className="space-y-3 sm:space-y-4">
+    <PullToRefresh onRefresh={handleRefresh}>
+      <div className="space-y-3 sm:space-y-4">
       {/* Header with actions */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <h2 className="text-lg sm:text-xl font-semibold">Infrastructure</h2>
@@ -268,6 +277,7 @@ export const ServerList: FC = () => {
           </div>
         </>
       ) : null}
-    </div>
+      </div>
+    </PullToRefresh>
   );
 };

@@ -100,6 +100,13 @@ class APIClient {
     if (!response.ok) throw new Error('Failed to get response from JARVIS');
     return response.json();
   }
+
+  async refreshCache(): Promise<void> {
+    const response = await fetch(`${API_BASE}/cache/refresh`, {
+      method: 'POST',
+    });
+    if (!response.ok) throw new Error('Failed to refresh cache');
+  }
 }
 
 export const apiClient = new APIClient();
