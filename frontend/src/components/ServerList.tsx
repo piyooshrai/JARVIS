@@ -6,6 +6,7 @@ interface Server {
   id: string;
   name: string;
   provider: string;
+  type: string;
   size: string;
   cost_monthly: number;
   status: string;
@@ -24,6 +25,7 @@ export const ServerList: FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filterProvider, setFilterProvider] = useState<string>('All');
+  const [filterType, setFilterType] = useState<string>('All');
 
   useEffect(() => {
     loadServers();
@@ -44,9 +46,26 @@ export const ServerList: FC = () => {
     }
   };
 
-  const filteredServers = filterProvider === 'All'
-    ? servers
-    : servers.filter(s => s.provider === filterProvider);
+  const filteredServers = servers.filter(s => {
+    const providerMatch = filterProvider === 'All' || s.provider === filterProvider;
+    const typeMatch = filterType === 'All' || s.type === filterType;
+    return providerMatch && typeMatch;
+  });
+
+  const formatExpirationDate = (dateString: string | undefined) => {
+    if (!dateString) return '-';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return '-';
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch {
+      return '-';
+    }
+  };
 
   const columns = [
     {
@@ -57,6 +76,10 @@ export const ServerList: FC = () => {
     {
       header: 'Provider',
       accessor: 'provider' as keyof Server,
+    },
+    {
+      header: 'Type',
+      accessor: 'type' as keyof Server,
     },
     {
       header: 'Size',
@@ -72,9 +95,7 @@ export const ServerList: FC = () => {
     },
     {
       header: 'Expires',
-      accessor: (server: Server) => server.expires_at
-        ? new Date(server.expires_at).toLocaleDateString()
-        : '-',
+      accessor: (server: Server) => formatExpirationDate(server.expires_at),
     },
     {
       header: 'Status',
@@ -107,6 +128,16 @@ export const ServerList: FC = () => {
             <option value="DigitalOcean">DigitalOcean</option>
             <option value="AWS">AWS</option>
             <option value="GoDaddy">GoDaddy</option>
+          </select>
+          <select
+            value={filterType}
+            onChange={(e) => setFilterType(e.target.value)}
+            className="px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+          >
+            <option value="All">All Types</option>
+            <option value="Server">Servers</option>
+            <option value="Domain">Domains</option>
+            <option value="SSL Certificate">SSL Certificates</option>
           </select>
           <Button variant="secondary" disabled>
             Sync All

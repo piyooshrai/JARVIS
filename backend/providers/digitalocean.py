@@ -43,6 +43,7 @@ class DigitalOceanProvider:
                         "id": str(droplet["id"]),
                         "name": droplet["name"],
                         "provider": "DigitalOcean",
+                        "type": "Server",
                         "size": f"{droplet['vcpus']} vCPU, {droplet['memory']}MB RAM",
                         "cost_monthly": float(price_monthly),
                         "status": droplet["status"],

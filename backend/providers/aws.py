@@ -69,6 +69,7 @@ class AWSProvider:
                             "id": instance['InstanceId'],
                             "name": name,
                             "provider": "AWS",
+                            "type": "Server",
                             "size": instance_type,
                             "cost_monthly": float(cost_monthly),
                             "status": state,
