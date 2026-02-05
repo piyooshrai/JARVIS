@@ -2,6 +2,7 @@ import { useState, useEffect, type FC } from 'react';
 import { Table } from './Table';
 import { Button } from './Button';
 import { CreateUserModal } from './CreateUserModal';
+import { PullToRefresh } from './PullToRefresh';
 import { apiClient, User, UserListResponse, Domain } from '../api/client';
 
 export const UserList: FC = () => {
@@ -51,6 +52,12 @@ export const UserList: FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    // Clear cache and reload data
+    await apiClient.refreshCache();
+    await Promise.all([loadDomains(), loadUsers()]);
   };
 
   const formatDate = (dateStr: string | null) => {
@@ -314,7 +321,8 @@ export const UserList: FC = () => {
   ];
 
   return (
-    <div className="space-y-3 sm:space-y-4">
+    <PullToRefresh onRefresh={handleRefresh}>
+      <div className="space-y-3 sm:space-y-4">
       {/* Mobile: Search and Filter */}
       <div className="sm:hidden space-y-3">
         <input
@@ -583,6 +591,7 @@ export const UserList: FC = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </PullToRefresh>
   );
 };
