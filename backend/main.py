@@ -6,6 +6,7 @@ from datetime import datetime
 import logging
 
 from config import get_settings
+from cache import cache
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -48,8 +49,19 @@ def startup_event():
 async def get_domains():
     """Fetch verified domains from Microsoft 365"""
     try:
+        # Check cache first
+        cached = cache.get("domains")
+        if cached is not None:
+            logger.info("Returning cached domains")
+            return cached
+
+        # Fetch from API
         provider = MicrosoftGraphProvider()
         domains = await provider.get_domains()
+
+        # Cache for 1 hour
+        cache.set("domains", domains, ttl_seconds=3600)
+
         return domains
     except Exception as e:
         logger.error(f"Error fetching domains: {str(e)}", exc_info=True)
@@ -60,6 +72,16 @@ async def get_domains():
 async def get_users(domain: Optional[str] = None, db: Session = Depends(get_db)):
     """List all O365 users, filterable by domain"""
     try:
+        # Create cache key based on domain filter
+        cache_key = f"users:{domain if domain else 'all'}"
+
+        # Check cache first
+        cached = cache.get(cache_key)
+        if cached is not None:
+            logger.info(f"Returning cached users for domain: {domain or 'all'}")
+            return cached
+
+        # Fetch from API
         provider = MicrosoftGraphProvider()
         users = await provider.get_users(domain=domain)
 
@@ -73,11 +95,16 @@ async def get_users(domain: Optional[str] = None, db: Session = Depends(get_db))
                 else:
                     monthly_cost += 6.00
 
-        return UserListResponse(
+        result = UserListResponse(
             users=users,
             total=len(users),
             monthly_cost=monthly_cost
         )
+
+        # Cache for 1 hour
+        cache.set(cache_key, result, ttl_seconds=3600)
+
+        return result
     except Exception as e:
         logger.error(f"Error fetching users: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -95,6 +122,13 @@ async def create_user(user_request: CreateUserRequest, db: Session = Depends(get
             department=user_request.department,
             license_type=user_request.license_type
         )
+
+        # Invalidate user caches (all variations)
+        cache.invalidate("users:all")
+        # Also invalidate domain-specific caches (simple approach: clear all user caches)
+        for key in list(cache.store.keys()):
+            if key.startswith("users:"):
+                cache.invalidate(key)
 
         # Log the action
         log = AuditLog(
@@ -120,6 +154,11 @@ async def disable_user(user_id: str, db: Session = Depends(get_db)):
         success = await provider.disable_user(user_id)
 
         if success:
+            # Invalidate user caches
+            for key in list(cache.store.keys()):
+                if key.startswith("users:"):
+                    cache.invalidate(key)
+
             # Log the action
             log = AuditLog(
                 action="disable_user",
@@ -146,6 +185,11 @@ async def delete_user(user_id: str, db: Session = Depends(get_db)):
         success = await provider.delete_user(user_id)
 
         if success:
+            # Invalidate user caches
+            for key in list(cache.store.keys()):
+                if key.startswith("users:"):
+                    cache.invalidate(key)
+
             # Log the action
             log = AuditLog(
                 action="delete_user",
@@ -204,6 +248,12 @@ async def ask_jarvis(request: AIAnalysisRequest):
 async def get_servers():
     """List all servers from DO, AWS, GoDaddy"""
     try:
+        # Check cache first
+        cached = cache.get("servers")
+        if cached is not None:
+            logger.info("Returning cached servers")
+            return cached
+
         from providers.digitalocean import DigitalOceanProvider
         from providers.aws import AWSProvider
         from providers.godaddy import GoDaddyProvider
@@ -234,14 +284,33 @@ async def get_servers():
         except Exception as e:
             logger.error(f"Error fetching GoDaddy servers: {str(e)}")
 
-        return {
+        result = {
             "servers": servers,
             "total": len(servers),
             "monthly_cost": sum(s.get("cost_monthly", 0) for s in servers)
         }
+
+        # Cache for 1 hour
+        cache.set("servers", result, ttl_seconds=3600)
+
+        return result
     except Exception as e:
         logger.error(f"Error fetching servers: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# Cache management
+@app.post("/api/cache/refresh")
+async def refresh_cache():
+    """Manually clear all caches to force fresh data"""
+    cache.clear()
+    return {"success": True, "message": "Cache cleared successfully"}
+
+
+@app.get("/api/cache/stats")
+async def cache_stats():
+    """Get cache statistics"""
+    return cache.get_stats()
 
 
 # Health check
