@@ -54,7 +54,8 @@ class GoDaddyProvider:
                             "id": str(domain_detail.get("domainId", domain_name)),
                             "name": domain_name,
                             "provider": "GoDaddy",
-                            "size": "Domain Registration",
+                            "type": "Domain",
+                            "size": "-",
                             "cost_monthly": 0,  # GoDaddy doesn't expose pricing in API
                             "status": domain_detail.get("status", "ACTIVE").lower(),
                             "region": "global",
@@ -67,7 +68,8 @@ class GoDaddyProvider:
                             "id": str(domain_summary.get("domainId", domain_name)),
                             "name": domain_name,
                             "provider": "GoDaddy",
-                            "size": "Domain Registration",
+                            "type": "Domain",
+                            "size": "-",
                             "cost_monthly": 0,
                             "status": domain_summary.get("status", "ACTIVE").lower(),
                             "region": "global"
@@ -88,7 +90,8 @@ class GoDaddyProvider:
                             "id": cert.get("certificateId", cert.get("commonName", "unknown")),
                             "name": cert.get("commonName", "SSL Certificate"),
                             "provider": "GoDaddy",
-                            "size": f"SSL - {cert.get('type', 'Standard')}",
+                            "type": "SSL Certificate",
+                            "size": cert.get('type', 'Standard'),
                             "cost_monthly": 0,  # GoDaddy doesn't expose pricing in API
                             "status": cert.get("status", "ACTIVE").lower(),
                             "region": "global",
