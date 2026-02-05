@@ -66,10 +66,8 @@ class MicrosoftGraphProvider:
         token = self._get_access_token()
         headers = {"Authorization": f"Bearer {token}"}
 
-        # Request user properties including signInActivity
-        # Note: signInActivity requires Azure AD Premium, but we'll request it anyway
-        # If not available, it will just be absent from the response
-        select_params = "id,displayName,mail,userPrincipalName,accountEnabled,department,assignedLicenses,signInActivity"
+        # Request user properties (excluding signInActivity as it requires AuditLog.Read.All permission)
+        select_params = "id,displayName,mail,userPrincipalName,accountEnabled,department,assignedLicenses"
         url = f"{self.graph_endpoint}/users?$select={select_params}"
 
         users = []
