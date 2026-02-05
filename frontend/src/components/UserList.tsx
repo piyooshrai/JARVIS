@@ -314,58 +314,63 @@ export const UserList: FC = () => {
   ];
 
   return (
-    <div className="space-y-4">
-      {/* Header with filters and actions */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div>
-            <input
-              type="text"
-              placeholder="Search users..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black focus:border-black w-64"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-gray-700 mr-2">
-              Filter by domain:
-            </label>
-            <select
-              value={selectedDomain}
-              onChange={(e) => setSelectedDomain(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
-            >
-              <option value="">All Domains</option>
-              {domains.map((domain) => (
-                <option key={domain.id} value={domain.name}>
-                  {domain.name}
-                </option>
-              ))}
-            </select>
-          </div>
+    <div className="space-y-3 sm:space-y-4">
+      {/* Mobile: Search and Filter */}
+      <div className="sm:hidden space-y-3">
+        <input
+          type="text"
+          placeholder="Search users..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+        />
+        <select
+          value={selectedDomain}
+          onChange={(e) => setSelectedDomain(e.target.value)}
+          className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-black"
+        >
+          <option value="">All Domains</option>
+          {domains.map((domain) => (
+            <option key={domain.id} value={domain.name}>
+              {domain.name}
+            </option>
+          ))}
+        </select>
+        <div className="flex gap-2">
+          <Button variant="secondary" onClick={exportToCSV} className="flex-1">
+            Export
+          </Button>
+          <Button variant="secondary" onClick={handleAnalyzeUsers} className="flex-1">
+            AI Cleanup
+          </Button>
+          <Button variant="primary" onClick={() => setIsCreateModalOpen(true)} className="flex-1">
+            + New
+          </Button>
+        </div>
+      </div>
 
-          {selectedUserIds.size > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">
-                {selectedUserIds.size} selected
-              </span>
-              <Button
-                variant="secondary"
-                onClick={handleBulkDisable}
-                disabled={bulkActionLoading}
-              >
-                {bulkActionLoading ? 'Processing...' : 'Bulk Disable'}
-              </Button>
-              <Button
-                variant="danger"
-                onClick={handleBulkDelete}
-                disabled={bulkActionLoading}
-              >
-                {bulkActionLoading ? 'Processing...' : 'Bulk Delete'}
-              </Button>
-            </div>
-          )}
+      {/* Desktop: Header with filters and actions */}
+      <div className="hidden sm:flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black focus:border-black w-64"
+          />
+          <select
+            value={selectedDomain}
+            onChange={(e) => setSelectedDomain(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black focus:border-black"
+          >
+            <option value="">All Domains</option>
+            {domains.map((domain) => (
+              <option key={domain.id} value={domain.name}>
+                {domain.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex items-center gap-3">
@@ -373,7 +378,7 @@ export const UserList: FC = () => {
             Export CSV
           </Button>
           <Button variant="secondary" onClick={handleAnalyzeUsers}>
-            Cleanup Inactive Users
+            Cleanup Inactive
           </Button>
           <Button variant="primary" onClick={() => setIsCreateModalOpen(true)}>
             + New User
@@ -382,9 +387,9 @@ export const UserList: FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="flex gap-6 text-sm">
+      <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm bg-gray-50 sm:bg-transparent -mx-4 sm:mx-0 px-4 sm:px-0 py-3 sm:py-0">
         <div>
-          <span className="text-gray-500">Total Users:</span>{' '}
+          <span className="text-gray-500">Total:</span>{' '}
           <span className="font-semibold">{totalUsers}</span>
         </div>
         <div>
@@ -393,14 +398,38 @@ export const UserList: FC = () => {
         </div>
       </div>
 
+      {/* Bulk Actions (Desktop only) */}
+      {selectedUserIds.size > 0 && (
+        <div className="hidden sm:flex items-center gap-3 bg-gray-50 px-4 py-3 rounded-lg border border-gray-200">
+          <span className="text-sm text-gray-700">
+            {selectedUserIds.size} user{selectedUserIds.size > 1 ? 's' : ''} selected
+          </span>
+          <div className="flex-1" />
+          <Button
+            variant="secondary"
+            onClick={handleBulkDisable}
+            disabled={bulkActionLoading}
+          >
+            {bulkActionLoading ? 'Processing...' : 'Disable Selected'}
+          </Button>
+          <Button
+            variant="danger"
+            onClick={handleBulkDelete}
+            disabled={bulkActionLoading}
+          >
+            {bulkActionLoading ? 'Processing...' : 'Delete Selected'}
+          </Button>
+        </div>
+      )}
+
       {/* Error message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded">
+        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
 
-      {/* Table */}
+      {/* Loading / Empty States */}
       {loading ? (
         <div className="text-center py-12 text-gray-500">Loading users...</div>
       ) : filteredUsers.length === 0 ? (
@@ -408,7 +437,65 @@ export const UserList: FC = () => {
           {searchQuery ? 'No users match your search.' : 'No users found.'}
         </div>
       ) : (
-        <Table columns={columns} data={filteredUsers} />
+        <>
+          {/* Mobile: Card View */}
+          <div className="sm:hidden space-y-3">
+            {filteredUsers.map((user) => (
+              <div key={user.id} className="bg-white border border-gray-200 rounded-xl p-4 active:bg-gray-50 transition-colors">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-base truncate">{user.display_name}</h3>
+                    <p className="text-sm text-gray-600 truncate mt-0.5">{user.email}</p>
+                  </div>
+                  <span
+                    className={`ml-3 inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                      user.account_enabled
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
+                    {user.account_enabled ? 'Active' : 'Disabled'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                  <div>
+                    <span className="text-gray-500">Domain:</span>
+                    <p className="font-medium truncate mt-0.5">{user.domain}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Last Sign-in:</span>
+                    <p className="font-medium truncate mt-0.5">{formatDate(user.last_sign_in)}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-3 border-t border-gray-100">
+                  {user.account_enabled && (
+                    <button
+                      onClick={() => handleDisableUser(user)}
+                      disabled={actionLoading === user.id}
+                      className="flex-1 px-3 py-2 text-sm text-gray-700 bg-gray-100 rounded-lg active:bg-gray-200 disabled:opacity-50 font-medium"
+                    >
+                      {actionLoading === user.id ? 'Disabling...' : 'Disable'}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setUserToDelete(user)}
+                    disabled={actionLoading === user.id}
+                    className="flex-1 px-3 py-2 text-sm text-red-600 bg-red-50 rounded-lg active:bg-red-100 disabled:opacity-50 font-medium"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: Table View */}
+          <div className="hidden sm:block">
+            <Table columns={columns} data={filteredUsers} />
+          </div>
+        </>
       )}
 
       {/* Create User Modal */}

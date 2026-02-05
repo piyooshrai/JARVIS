@@ -204,16 +204,70 @@ export const ServerList: FC = () => {
         </div>
       )}
 
-      {/* Table */}
+      {/* Loading / Empty States */}
       {loading ? (
         <div className="text-center py-12 text-gray-500">Loading servers...</div>
       ) : servers.length === 0 && !error ? (
         <div className="border border-gray-200 rounded p-12 text-center text-gray-500">
           No servers found. Add cloud provider credentials to get started.
         </div>
-      ) : (
-        filteredServers.length > 0 && <Table columns={columns} data={filteredServers} />
-      )}
+      ) : filteredServers.length > 0 ? (
+        <>
+          {/* Mobile: Card View */}
+          <div className="sm:hidden space-y-3">
+            {filteredServers.map((server) => (
+              <div key={server.id} className="bg-white border border-gray-200 rounded-xl p-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-base truncate">{server.name}</h3>
+                    <p className="text-sm text-gray-600 truncate mt-0.5">{server.provider}</p>
+                  </div>
+                  <div className="ml-3 flex flex-col items-end gap-1.5">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                      {server.type}
+                    </span>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                        server.status === 'active'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {server.status.charAt(0).toUpperCase() + server.status.slice(1)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-gray-500">Size:</span>
+                    <p className="font-medium truncate mt-0.5">{server.size}</p>
+                  </div>
+                  {server.region && (
+                    <div>
+                      <span className="text-gray-500">Region:</span>
+                      <p className="font-medium truncate mt-0.5">{server.region}</p>
+                    </div>
+                  )}
+                  <div>
+                    <span className="text-gray-500">Cost/Month:</span>
+                    <p className="font-medium truncate mt-0.5">${server.cost_monthly.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Expires:</span>
+                    <p className="font-medium truncate mt-0.5">{formatExpirationDate(server.expires_at)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop: Table View */}
+          <div className="hidden sm:block">
+            <Table columns={columns} data={filteredServers} />
+          </div>
+        </>
+      ) : null}
     </div>
   );
 };
