@@ -21,8 +21,6 @@ interface ServerListResponse {
 
 export const ServerList: FC = () => {
   const [servers, setServers] = useState<Server[]>([]);
-  const [totalServers, setTotalServers] = useState(0);
-  const [monthlyCost, setMonthlyCost] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filterProvider, setFilterProvider] = useState<string>('All');
@@ -39,8 +37,6 @@ export const ServerList: FC = () => {
       if (!response.ok) throw new Error('Failed to fetch servers');
       const data: ServerListResponse = await response.json();
       setServers(data.servers);
-      setTotalServers(data.total);
-      setMonthlyCost(data.monthly_cost);
     } catch (err) {
       setError('Server management integrations coming soon...');
     } finally {
