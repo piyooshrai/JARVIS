@@ -204,22 +204,35 @@ async def ask_jarvis(request: AIAnalysisRequest):
 async def get_servers():
     """List all servers from DO, AWS, GoDaddy"""
     try:
-        # TODO: Implement actual provider calls when ready
-        # from providers.digitalocean import DigitalOceanProvider
-        # from providers.aws import AWSProvider
-        # from providers.godaddy import GoDaddyProvider
+        from providers.digitalocean import DigitalOceanProvider
+        from providers.aws import AWSProvider
+        from providers.godaddy import GoDaddyProvider
 
-        servers = [
-            {
-                "id": "demo-1",
-                "name": "demo-server-1",
-                "provider": "DigitalOcean",
-                "size": "2 vCPU, 2GB RAM",
-                "cost_monthly": 12.00,
-                "status": "active",
-                "region": "nyc3"
-            }
-        ]
+        servers = []
+
+        # Fetch DigitalOcean droplets
+        try:
+            do_provider = DigitalOceanProvider()
+            do_servers = await do_provider.get_droplets()
+            servers.extend(do_servers)
+        except Exception as e:
+            logger.error(f"Error fetching DigitalOcean servers: {str(e)}")
+
+        # Fetch AWS EC2 instances across all regions
+        try:
+            aws_provider = AWSProvider()
+            aws_servers = await aws_provider.get_instances()
+            servers.extend(aws_servers)
+        except Exception as e:
+            logger.error(f"Error fetching AWS servers: {str(e)}")
+
+        # Fetch GoDaddy domains
+        try:
+            godaddy_provider = GoDaddyProvider()
+            godaddy_servers = await godaddy_provider.get_servers()
+            servers.extend(godaddy_servers)
+        except Exception as e:
+            logger.error(f"Error fetching GoDaddy servers: {str(e)}")
 
         return {
             "servers": servers,
